@@ -11,7 +11,7 @@ on:
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest  # Use GitHub-hosted runner
+    runs-on: ubuntu-latest  # GitHub-hosted runner
 
     env:
       ACR_NAME: devrevinciacrDemo           # Your Azure Container Registry name
@@ -21,10 +21,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3            # Pulls your repo code into the runner
 
-    - name: Set lowercase ACR name
+    - name: Set lowercase ACR name and registry URL
       run: |
         # Convert ACR name to lowercase to avoid push/login errors
-        echo "ACR_NAME_LC=$(echo $ACR_NAME | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+        ACR_NAME_LC=$(echo $ACR_NAME | tr '[:upper:]' '[:lower:]')
+        echo "ACR_NAME_LC=$ACR_NAME_LC" >> $GITHUB_ENV
         echo "ACR_SERVER_LC=${ACR_NAME_LC}.azurecr.io" >> $GITHUB_ENV
 
     - name: Azure Login
