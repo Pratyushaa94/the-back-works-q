@@ -1,60 +1,65 @@
-name: Build and Push Docker Image to ACR
+name: CI for Microservices & Common Modules
 
-# Trigger manually via GitHub UI with a service name input
 on:
-  workflow_dispatch:
-    inputs:
-      service:
-        description: 'Name of the backend service to build (e.g. platform-initializer)'
-        required: true
-        default: 'platform-initializer'
+  push:
+    branches: [ main ]
 
 jobs:
-  build-and-push:
-    runs-on: ubuntu-latest  # GitHub-hosted runner
+  build:
+    runs-on: ubuntu-latest
 
-    env:
-      ACR_NAME: devrevinciacrDemo           # Your Azure Container Registry name
-      NS: revinci-platform                  # Namespace or repo prefix inside ACR
+    strategy:
+      matrix:
+        module: 
+          - platform-initializer
+          - tenant-service
+          - notification-service
+          - commons
+          - utilities
+          # add more services here if needed
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3            # Pulls your repo code into the runner
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set lowercase ACR name and registry URL
-      run: |
-        # Convert ACR name to lowercase to avoid push/login errors
-        ACR_NAME_LC=$(echo $ACR_NAME | tr '[:upper:]' '[:lower:]')
-        echo "ACR_NAME_LC=$ACR_NAME_LC" >> $GITHUB_ENV
-        echo "ACR_SERVER_LC=${ACR_NAME_LC}.azurecr.io" >> $GITHUB_ENV
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 21
 
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}  # Uses your service principal JSON
+      - name: Grant Gradle Wrapper permission
+        run: chmod +x ./gradlew
 
-    - name: ACR Login
-      run: az acr login --name $ACR_NAME_LC       # Authenticates Docker with ACR
+      # ------------------------
+      # Dockerized services
+      # ------------------------
+      - name: Build Docker image for microservice
+        if: contains(matrix.module, 'service') || matrix.module == 'platform-initializer' || matrix.module == 'tenant-service' || matrix.module == 'notification-service'
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ secrets.ACR_LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
 
-    - name: Generate timestamped tag
-      run: |
-        # Create a unique tag using current date/time
-        echo "IMAGE_TAG=test-$(date +%Y%m%d-%H%M%S)" >> $GITHUB_ENV
+      - name: Build & Push Docker Image
+        if: contains(matrix.module, 'service') || matrix.module == 'platform-initializer' || matrix.module == 'tenant-service' || matrix.module == 'notification-service'
+        run: |
+          docker build --build-arg SERVICE=${{ matrix.module }} -t ${{ secrets.ACR_LOGIN_SERVER }}/${{ matrix.module }}:${{ github.sha }} .
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/${{ matrix.module }}:${{ github.sha }}
+          docker tag ${{ secrets.ACR_LOGIN_SERVER }}/${{ matrix.module }}:${{ github.sha }} ${{ secrets.ACR_LOGIN_SERVER }}/${{ matrix.module }}:latest
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/${{ matrix.module }}:latest
 
-    - name: Build Docker image
-      run: |
-        # Build the image using centralized Dockerfile and service name
-        docker build --no-cache \
-          --build-arg SERVICE=${{ github.event.inputs.service }} \
-          --build-arg GRADLE_ARGS="-Pci=true -PskipDocker=true -PskipAzChecks=true" \
-          -t $ACR_SERVER_LC/$NS/${{ github.event.inputs.service }}:$IMAGE_TAG .
+      # ------------------------
+      # Non-docker modules
+      # ------------------------
+      - name: Build non-docker module
+        if: matrix.module == 'commons' || matrix.module == 'utilities'
+        run: ./gradlew ":${{ matrix.module }}:build" -x test --no-daemon
 
-    - name: Push Docker image
-      run: |
-        # Push the tagged image to ACR
-        docker push $ACR_SERVER_LC/$NS/${{ github.event.inputs.service }}:$IMAGE_TAG
-
-    - name: Output image reference
-      run: |
-        # Print the final image reference for traceability
-        echo "✅ Image pushed: $ACR_SERVER_LC/$NS/${{ github.event.inputs.service }}:$IMAGE_TAG"
+      - name: Upload artifacts for non-docker modules
+        if: matrix.module == 'commons' || matrix.module == 'utilities'
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.module }}-artifact
+          path: ${{ matrix.module }}/build/libs/*.jar
