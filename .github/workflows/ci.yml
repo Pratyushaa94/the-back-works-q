@@ -59,7 +59,7 @@ jobs:
 
       - name: Upload artifacts for non-docker modules
         if: matrix.module == 'commons' || matrix.module == 'utilities'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.module }}-artifact
           path: ${{ matrix.module }}/build/libs/*.jar
