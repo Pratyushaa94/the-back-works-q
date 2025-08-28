@@ -1,50 +1,91 @@
-name: Build & Push to ACR
+name: Build & Push All Services to ACR
 
 on:
   push:
     branches:
-      - main   # Change if needed
+      - main
 
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repo
+      # 1️⃣ Checkout the repo
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 2. Set up JDK 21
-      - name: Set up JDK
+      # 2️⃣ Set up Java 21
+      - name: Set up Java 21
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
 
-      # 3. Give gradlew permissions
+      # 3️⃣ Make gradlew executable
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      # 4. Build JAR (skip tests)
-      - name: Build JAR
-        run: ./gradlew :services:platform-initializer:clean :services:platform-initializer:bootJar -x test
-
-      # 5. Login to ACR
+      # 4️⃣ Login to ACR
       - name: Login to ACR
         uses: docker/login-action@v3
         with:
-          registry: ${{ secrets.ACR_LOGIN_SERVER }}   # Example: myregistry.azurecr.io
+          registry: ${{ secrets.ACR_LOGIN_SERVER }}
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
 
-      # 6. Build Docker image
-      - name: Build Docker Image
+      # 5️⃣ Build & push platform-initializer first
+      - name: Build & Push platform-initializer
         run: |
-          docker build --no-cache \
-            --build-arg SERVICE=platform-initializer \
-            --build-arg GRADLE_ARGS="-Pci=true -PskipDocker=true -PskipAzChecks=true" \
-            -t ${{ secrets.ACR_SERVER }}/${{ secrets.NS }}/${{ secrets.IMAGE_NAME }}:${{ github.sha }} .
+          echo "✅ Building JAR for platform-initializer"
+          ./gradlew :platform-initializer:clean :platform-initializer:bootJar -x test
 
-      # 7. Push Docker image to ACR
-      - name: Push Docker Image
-        run: docker push ${{ secrets.ACR_SERVER }}/${{ secrets.NS }}/${{ secrets.IMAGE_NAME }}:${{ github.sha }}
+          IMAGE="${{ secrets.ACR_LOGIN_SERVER }}/${{ secrets.NS }}/platform-initializer:${{ github.sha }}"
+          echo "🚀 Building Docker image for platform-initializer -> $IMAGE"
+          docker build --no-cache \
+            --build-arg SERVICE="platform-initializer" \
+            --build-arg GRADLE_ARGS="-Pci=true -PskipDocker=true -PskipAzChecks=true" \
+            -t "$IMAGE" .
+
+          echo "📦 Pushing Docker image for platform-initializer"
+          docker push "$IMAGE"
+
+          docker tag "$IMAGE" "${{ secrets.ACR_LOGIN_SERVER }}/${{ secrets.NS }}/platform-initializer:latest"
+          docker push "${{ secrets.ACR_LOGIN_SERVER }}/${{ secrets.NS }}/platform-initializer:latest"
+
+      # 6️⃣ Discover all other services with bootJar
+      - name: Discover Services
+        id: services
+        run: |
+          PROJECTS_RAW=$(./gradlew projects --console=plain | grep -o "Project ':[^']*'")
+          ALL_PROJECTS=$(echo "$PROJECTS_RAW" | sed "s/Project ':\(.*\)'/\1/" | sort -u)
+          SERVICES=""
+          while IFS= read -r P; do
+            [ -z "$P" ] && continue
+            # skip platform-initializer as already built
+            if [ "$P" == "platform-initializer" ]; then continue; fi
+            if ./gradlew -q ":${P}:tasks" --all | grep -qE '^bootJar[[:space:]]'; then
+              SERVICES="${SERVICES} $P"
+            fi
+          done <<< "$ALL_PROJECTS"
+          echo "SERVICES=$SERVICES" >> $GITHUB_ENV
+
+      # 7️⃣ Build & push each remaining service
+      - name: Build & Push Services
+        run: |
+          for SVC in $SERVICES; do
+            echo "✅ Building JAR for $SVC"
+            ./gradlew ":$SVC:clean" ":$SVC:bootJar" -x test
+
+            IMAGE="${{ secrets.ACR_LOGIN_SERVER }}/${{ secrets.NS }}/$SVC:${{ github.sha }}"
+            echo "🚀 Building Docker image for $SVC -> $IMAGE"
+            docker build --no-cache \
+              --build-arg SERVICE="$SVC" \
+              --build-arg GRADLE_ARGS="-Pci=true -PskipDocker=true -PskipAzChecks=true" \
+              -t "$IMAGE" .
+
+            echo "📦 Pushing Docker image for $SVC"
+            docker push "$IMAGE"
+
+            docker tag "$IMAGE" "${{ secrets.ACR_LOGIN_SERVER }}/${{ secrets.NS }}/$SVC:latest"
+            docker push "${{ secrets.ACR_LOGIN_SERVER }}/${{ secrets.NS }}/$SVC:latest"
+          done
