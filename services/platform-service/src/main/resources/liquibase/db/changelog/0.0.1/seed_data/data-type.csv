@@ -1,0 +1,22 @@
+code,name,description
+BOOLEAN,Boolean,Boolean data type.
+BOOLEAN_ARRAY,Boolean Array,Boolean array data type.
+CHAR,Character,Character data type.
+DATE,Date,Date data type.
+DATE_ARRAY,Date Array,Date array.
+DOUBLE,Double,Double data type.
+DOUBLE_ARRAY,Double Array,Double array data type.
+ENCRYPTED_STRING,Encrypted String,Encrypted string data type.
+FLOAT,Float,Float data type.
+FLOAT_ARRAY,Float Array,Float array data type.
+INTEGER,Integer,Integer data type.
+INTEGER_ARRAY,Integer Array,Integer array data type.
+LOCATION,Latitude and Longitude,Location data type for latitude and longitude.
+LONG,Long,Long data type.
+LONG_ARRAY,Long Array,Long array data type.
+OBJECT,Object,Generic object data type.
+OBJECT_ARRAY,Object Array,Array of generic object data types.
+PASSWORD,Password,Password data type.
+STRING,String,String data type.
+STRING_ARRAY,String Array,String array data type.
+UUID,UUID,UUID data type.

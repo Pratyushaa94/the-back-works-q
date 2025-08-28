@@ -1,0 +1,76 @@
+/*
+ * Copyright (c) 2025 Revinci AI.
+ *
+ * All rights reserved. This software is proprietary to and embodies the
+ * confidential technology of Revinci AI. Possession,
+ * use, duplication, or dissemination of the software and media is
+ * authorized only pursuant to a valid written license from
+ * Revinci AI Solutions Pvt. Ltd.
+ *
+ * Unauthorized use of this software is strictly prohibited.
+ *
+ * THIS SOFTWARE IS PROVIDED BY Revinci AI "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL Revinci AI BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+ * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+ 
+ rootProject.name = 'revinci-platform'
+
+include(':cache-commons')
+include(':data-jpa-commons')
+include(':multitenancy-commons')
+include(':platform-commons')
+include(':provisioning-status-handler-commons')
+include(':provisioning-db-commons')
+include(':security-commons')
+include(':tenant-data-jpa-commons')
+include(':web-commons')
+include(':provisioning-iam-commons')
+include(':messaging-commons')
+include(":notification-commons")
+include(":notification-async-commons")
+include(":storage-commons")
+
+
+include(':platform-initializer')
+include(':keycloak-admin-client')
+
+include(":platform-service")
+include(":tenant-service")
+include(":notification-service")
+include(":iam-keycloak-provisioning-service")
+include(":iam-keycloak-sync-service")
+include(":azure-db-provisioning-service")
+
+project(":cache-commons").projectDir = file('commons/cache-commons')
+project(":data-jpa-commons").projectDir = file('commons/data-jpa-commons')
+project(":multitenancy-commons").projectDir = file('commons/multitenancy-commons')
+project(":platform-commons").projectDir = file('commons/platform-commons')
+project(":provisioning-status-handler-commons").projectDir = file('commons/provisioning-status-handler-commons')
+project(":security-commons").projectDir = file('commons/security-commons')
+project(":tenant-data-jpa-commons").projectDir = file('commons/tenant-data-jpa-commons')
+project(":web-commons").projectDir = file('commons/web-commons')
+project(":provisioning-db-commons").projectDir = file('commons/provisioning-db-commons')
+project(":messaging-commons").projectDir = file('commons/messaging-commons')
+project(":provisioning-iam-commons").projectDir = file('commons/provisioning-iam-commons')
+project(":notification-commons").projectDir = file('commons/notification-commons')
+project(":notification-async-commons").projectDir = file('commons/notification-async-commons')
+project(":storage-commons").projectDir = file('commons/storage-commons')
+
+
+project(":platform-service").projectDir = file('services/platform-service')
+project(":tenant-service").projectDir = file('services/tenant-service')
+project(":notification-service").projectDir = file('services/notification-service')
+project(":iam-keycloak-provisioning-service").projectDir = file('services/iam-keycloak-provisioning-service')
+project(":iam-keycloak-sync-service").projectDir = file('services/iam-keycloak-sync-service')
+project(":azure-db-provisioning-service").projectDir = file('services/azure-db-provisioning-service')
+
+project(":platform-initializer").projectDir = file('utilities/platform-initializer')
+project(":keycloak-admin-client").projectDir = file('utilities/keycloak-admin-client')

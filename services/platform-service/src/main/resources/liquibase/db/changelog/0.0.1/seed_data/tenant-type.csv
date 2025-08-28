@@ -1,0 +1,3 @@
+code,name,description
+COMPANY,Company,Tenant in this case is a company (B2B).
+INDIVIDUAL,Individual,Tenant in this case is an individual (B2C).

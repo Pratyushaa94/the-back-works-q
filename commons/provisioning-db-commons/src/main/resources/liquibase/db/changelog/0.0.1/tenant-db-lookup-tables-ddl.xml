@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~  Copyright (c) 2025 Revinci AI.
+  ~
+  ~  All rights reserved. This software is proprietary to and embodies the
+  ~  confidential technology of Revinci AI. Possession,
+  ~  use, duplication, or dissemination of the software and media is
+  ~  authorized only pursuant to a valid written license from Revinci AI.
+  ~
+  ~  Unauthorized use of this software is strictly prohibited.
+  ~
+  ~  THIS SOFTWARE IS PROVIDED BY Revinci AI "AS IS" AND ANY
+  ~  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  ~  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  ~  DISCLAIMED. IN NO EVENT SHALL REVINCI AI BE LIABLE FOR
+  ~  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  ~  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+  ~  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  ~  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+  ~  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+  ~  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  ~
+  ~ @author
+  ~
+  -->
+
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.33.xsd">
+
+    <!-- Lookup tables. -->
+    <changeSet id="0.0.1-ddl-lookup-1" author="Subbu">
+        <!-- Table: permission -->
+        <createTable tableName="permission">
+            <column name="code" type="VARCHAR(64)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(128)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(255)"/>
+        </createTable>
+        <!-- Creating index on the name column -->
+        <createIndex indexName="idx_permission_n" tableName="permission">
+            <column name="name"/>
+        </createIndex>
+
+        <!-- Table: data_type -->
+        <createTable tableName="data_type">
+            <column name="code" type="VARCHAR(32)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(32)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="description" type="VARCHAR(128)"/>
+        </createTable>
+        <!-- Creating index on the name column -->
+        <createIndex indexName="idx_data_type_n" tableName="data_type">
+            <column name="name"/>
+        </createIndex>
+
+
+        <!-- Table: constraint_type -->
+        <createTable tableName="constraint_type">
+            <column name="code" type="VARCHAR(32)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(64)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="description" type="VARCHAR(128)"/>
+        </createTable>
+        <!-- Creating index on the name column -->
+        <createIndex indexName="idx_constraint_type_n" tableName="constraint_type">
+            <column name="name"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

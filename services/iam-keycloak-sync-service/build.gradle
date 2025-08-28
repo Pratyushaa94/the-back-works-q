@@ -1,0 +1,34 @@
+
+plugins {
+    id 'buildlogic.java-conventions'
+    id 'org.springframework.boot' version '3.5.4'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+dependencies {
+    annotationProcessor libs.org.projectlombok.lombok
+
+    api project(":multitenancy-commons")
+    api project(":web-commons")
+    api project(":messaging-commons")
+
+    compileOnly libs.org.projectlombok.lombok
+
+    implementation libs.com.azure.spring.cloud.azure.starter.servicebus.jms
+    implementation libs.io.hypersistence.hypersistence.utils.hibernate
+    implementation libs.io.micrometer.micrometer.tracing.bridge.otel
+    implementation libs.org.keycloak.keycloak.admin.client
+    implementation libs.org.springframework.boot.spring.boot.starter.actuator
+    implementation libs.org.springframework.boot.spring.boot.starter.oauth2.resource.server
+    implementation libs.org.springframework.boot.spring.boot.starter.web
+    implementation libs.org.springframework.cloud.spring.cloud.stream
+
+    runtimeOnly libs.org.postgresql.postgresql
+
+    testImplementation libs.org.springframework.boot.spring.boot.starter.test
+}
+
+// Configure Docker for this service
+configureDocker(project)
+
+description = 'iam-keycloak-sync-service'

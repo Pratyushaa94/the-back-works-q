@@ -1,0 +1,30 @@
+spring:
+  profiles:
+    active: prod
+  cloud:
+    stream:
+      servicebus:
+        binder:
+          namespace: ${AZURE_SERVICEBUS_NAMESPACE_PROD}
+          connection-string: ${AZURE_SERVICEBUS_CONNECTION_STRING_PROD}
+  datasource:
+    url: jdbc:postgresql://${DB_HOST_PROD}:${DB_PORT_PROD:5432}/${DB_NAME_PROD}
+    username: ${DB_USERNAME_PROD}
+    password: ${DB_PASSWORD_PROD}
+
+# Azure Production Environment Configuration
+azure:
+  subscription-id: ${AZURE_SUBSCRIPTION_ID_PROD}
+  resource-group: ${AZURE_RESOURCE_GROUP_PROD}
+  location: ${AZURE_LOCATION_PROD:East US}
+  postgresql:
+    admin-username: ${AZURE_POSTGRESQL_ADMIN_USERNAME_PROD}
+    admin-password: ${AZURE_POSTGRESQL_ADMIN_PASSWORD_PROD}
+
+# Production Logging Configuration
+logging:
+  level:
+    ai.revinci.platform.services.db.provisioning.azure: INFO
+    com.azure: WARN
+    org.springframework.cloud.stream: INFO
+    root: WARN

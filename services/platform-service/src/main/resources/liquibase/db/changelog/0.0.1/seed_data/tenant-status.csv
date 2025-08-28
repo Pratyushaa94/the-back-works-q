@@ -1,0 +1,10 @@
+code,name,description
+NEW,New,Tenant record is new and not yet provisioned.
+PROVISIONING_IN_PROGRESS,Resource provisioning in progress,Tenant resources are being provisioned.
+PROVISIONING_COMPLETED,Resource provisioning completed,Tenant resources have been provisioned successfully.
+PROVISIONING_FAILED,Resource provisioning failed,Tenant resources provisioning failed.
+ACTIVE,Active,Tenant resources are active and ready to use.
+DEACTIVATE,Deactivate,Received request to deactivate tenant.
+DEACTIVATION_IN_PROGRESS,Deactivation in progress,Tenant deactivation is in progress.
+DEACTIVATION_FAILED,Deactivation failed,Tenant deactivation failed.
+DEACTIVATED,Deactivated,Tenant has been successfully deactivated.

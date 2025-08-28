@@ -1,0 +1,85 @@
+spring:
+  application:
+    name: azure-db-provisioning-service
+  profiles:
+    active: demo
+  cloud:
+    stream:
+      bindings:
+        provisionDb-in-0:
+          destination: provision-db
+          group: azure-db-provisioning-service
+          consumer:
+            max-attempts: 3
+            back-off-initial-interval: 1000
+            back-off-max-interval: 10000
+            back-off-multiplier: 2.0
+      servicebus:
+        binder:
+          namespace: ${AZURE_SERVICEBUS_NAMESPACE}
+          connection-string: ${AZURE_SERVICEBUS_CONNECTION_STRING}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:rvc_platform_db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 20000
+      leak-detection-threshold: 60000
+
+# Azure Configuration
+azure:
+  subscription-id: ${AZURE_SUBSCRIPTION_ID}
+  resource-group: ${AZURE_RESOURCE_GROUP}
+  location: ${AZURE_LOCATION:East US}
+  postgresql:
+    admin-username: ${AZURE_POSTGRESQL_ADMIN_USERNAME:postgres}
+    admin-password: ${AZURE_POSTGRESQL_ADMIN_PASSWORD}
+
+# Server Configuration
+server:
+  port: 8080
+  servlet:
+    context-path: /azure-db-provisioning-service
+
+# Management & Monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# Logging Configuration
+logging:
+  level:
+    ai.revinci.platform.services.db.provisioning.azure: DEBUG
+    com.azure: INFO
+    org.springframework.cloud.stream: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{tenantId},%X{traceId},%X{spanId}] %logger{36} - %msg%n"
+
+# Database Provisioning Configuration
+database:
+  provisioning:
+    timeout-minutes: 30
+    retry:
+      max-attempts: 3
+      delay-seconds: 30

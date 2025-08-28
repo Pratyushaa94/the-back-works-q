@@ -1,0 +1,59 @@
+name: Build and Push Docker Image to ACR
+
+# Trigger manually via GitHub UI with a service name input
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: 'Name of the backend service to build (e.g. platform-initializer)'
+        required: true
+        default: 'platform-initializer'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest  # Use GitHub-hosted runner
+
+    env:
+      ACR_NAME: devrevinciacrDemo           # Your Azure Container Registry name
+      NS: revinci-platform                  # Namespace or repo prefix inside ACR
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3            # Pulls your repo code into the runner
+
+    - name: Set lowercase ACR name
+      run: |
+        # Convert ACR name to lowercase to avoid push/login errors
+        echo "ACR_NAME_LC=$(echo $ACR_NAME | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+        echo "ACR_SERVER_LC=${ACR_NAME_LC}.azurecr.io" >> $GITHUB_ENV
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}  # Uses your service principal JSON
+
+    - name: ACR Login
+      run: az acr login --name $ACR_NAME_LC       # Authenticates Docker with ACR
+
+    - name: Generate timestamped tag
+      run: |
+        # Create a unique tag using current date/time
+        echo "IMAGE_TAG=test-$(date +%Y%m%d-%H%M%S)" >> $GITHUB_ENV
+
+    - name: Build Docker image
+      run: |
+        # Build the image using centralized Dockerfile and service name
+        docker build --no-cache \
+          --build-arg SERVICE=${{ github.event.inputs.service }} \
+          --build-arg GRADLE_ARGS="-Pci=true -PskipDocker=true -PskipAzChecks=true" \
+          -t $ACR_SERVER_LC/$NS/${{ github.event.inputs.service }}:$IMAGE_TAG .
+
+    - name: Push Docker image
+      run: |
+        # Push the tagged image to ACR
+        docker push $ACR_SERVER_LC/$NS/${{ github.event.inputs.service }}:$IMAGE_TAG
+
+    - name: Output image reference
+      run: |
+        # Print the final image reference for traceability
+        echo "✅ Image pushed: $ACR_SERVER_LC/$NS/${{ github.event.inputs.service }}:$IMAGE_TAG"

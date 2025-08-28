@@ -1,0 +1,168 @@
+
+# Copyright (c) 2025 Revinci AI.
+#
+# All rights reserved. This software is proprietary to and embodies the
+# confidential technology of Revinci AI. Possession,
+# use, duplication, or dissemination of the software and media is
+# authorized only pursuant to a valid written license from
+# Revinci AI Solutions Pvt. Ltd.
+#
+# Unauthorized use of this software is strictly prohibited.
+#
+# THIS SOFTWARE IS PROVIDED BY Revinci AI "AS IS" AND ANY
+# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL Revinci AI BE LIABLE FOR
+# ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+# USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
+[versions]
+com-fasterxml-jackson-core-jackson-annotations = "2.19.2"
+com-fasterxml-jackson-core-jackson-databind = "2.19.2"
+com-github-ua-parser-uap-java = "1.6.1"
+com-google-googlejavaformat-google-java-format = "1.28.0"
+com-googlecode-owasp-java-html-sanitizer-owasp-java-html-sanitizer = "20240325.1"
+commons-cli-commons-cli = "1.10.0"
+commons-io-commons-io = "2.20.0"
+commons-validator-commons-validator = "1.10.0"
+com-opencsv-opencsv = "5.12.0"
+#io-hypersistence-hypersistence-utils-hibernate = "3.10.3"
+io-hypersistence-hypersistence-utils-hibernate = "3.8.2"
+io-github-openhtmltopdf-openhtmltopdf-pdfbox = "1.1.29"
+io-micrometer-micrometer-tracing-bridge-otel = "1.5.2"
+jakarta-servlet-jakarta-servlet-api = "6.1.0"
+org-apache-commons-commons-lang3 = "3.18.0"
+org-apache-commons-commons-text = "1.14.0"
+org-apache-poi-poi = "5.4.1"
+org-apache-pdfbox-pdfbox = "3.0.5"
+#org-hibernate-orm-hibernate-core= "7.0.5.Final"
+org-hibernate-orm-hibernate-core = "6.5.2.Final"
+org-jsoup-jsoup = "1.21.1"
+org-keycloak-keycloak-admin-client = "26.0.6"
+org-liquibase-liquibase-core = "4.33.0"
+org-mapstruct-mapstruct = "1.6.3"
+org-mapstruct-mapstruct-processor = "1.6.3"
+org-owasp-encoder-encoder = "1.3.1"
+
+# AZURE
+com-azure-azure-storage-blob= "12.31.1"
+com-azure-spring-cloud-azure-starter-storage = "5.23.0"
+com-azure-resourcemanager-sql = "2.49.0"
+com-azure-identity = "1.16.2"
+com-azure-spring-cloud-azure-starter-servicebus = "5.23.0"
+
+#POSTGRESQL
+org-postgresql-postgresql = "42.7.3"
+
+# Spring Doc - Open API - DONE
+org-springdoc-springdoc-openapi-starter-common = "2.8.9"
+org-springdoc-springdoc-openapi-starter-webmvc-ui = "2.8.9"
+# Spring Framework
+org-springframework-boot-spring-boot-starter = "3.5.4"
+org-springframework-boot-spring-boot-starter-actuator = "3.5.4"
+org-springframework-boot-spring-boot-starter-aop = "3.5.4"
+org-springframework-boot-spring-boot-starter-data-jpa = "3.5.4"
+org-springframework-boot-spring-boot-starter-data-redis = "3.5.4"
+org-springframework-boot-spring-boot-starter-freemarker = "3.5.4"
+org-springframework-boot-spring-boot-starter-logging = "3.5.4"
+org-springframework-boot-spring-boot-starter-mail = "3.5.4"
+org-springframework-boot-spring-boot-starter-oauth2-resource-server = "3.5.4"
+org-springframework-boot-spring-boot-starter-security = "3.5.4"
+org-springframework-boot-spring-boot-starter-test = "3.5.4"
+org-springframework-boot-spring-boot-starter-validation = "3.5.4"
+org-springframework-boot-spring-boot-starter-web = "3.5.4"
+org-springframework-cloud-spring-cloud-stream = "4.3.0"
+org-springframework-data-spring-data-jpa = "3.5.2"
+org-springframework-security-spring-security-config = "6.5.2"
+org-springframework-security-spring-security-core = "6.5.2"
+org-springframework-security-spring-security-oauth2-jose = "6.5.2"
+org-springframework-security-spring-security-test = "6.5.2"
+org-springframework-security-spring-security-web = "6.4.2"
+org-springframework-spring-aspects = "6.2.9"
+org-springframework-spring-context = "6.2.9"
+org-springframework-spring-web = "6.2.9"
+org-springframework-spring-webmvc = "6.2.9"
+org-passay-passay = "1.6.6"
+org-projectlombok-lombok = "1.18.38"
+
+
+[libraries]
+com-fasterxml-jackson-core-jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "com-fasterxml-jackson-core-jackson-annotations" }
+com-fasterxml-jackson-core-jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "com-fasterxml-jackson-core-jackson-databind" }
+com-github-ua-parser-uap-java = { module = "com.github.ua-parser:uap-java", version.ref = "com-github-ua-parser-uap-java" }
+com-googlecode-owasp-java-html-sanitizer-owasp-java-html-sanitizer = { module = "com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer", version.ref = "com-googlecode-owasp-java-html-sanitizer-owasp-java-html-sanitizer" }
+com-google-googlejavaformat-google-java-format = { module = "com.google.googlejavaformat:google-java-format", version.ref = "com-google-googlejavaformat-google-java-format" }
+com-opencsv-opencsv = { module = "com.opencsv:opencsv", version.ref = "com-opencsv-opencsv" }
+commons-cli-commons-cli = { module = "commons-cli:commons-cli", version.ref = "commons-cli-commons-cli" }
+commons-io-commons-io = { module = "commons-io:commons-io", version.ref = "commons-io-commons-io" }
+commons-validator-commons-validator = { module = "commons-validator:commons-validator", version.ref = "commons-validator-commons-validator" }
+io-hypersistence-hypersistence-utils-hibernate = { module = "io.hypersistence:hypersistence-utils-hibernate-63", version.ref = "io-hypersistence-hypersistence-utils-hibernate" }
+io-github-openhtmltopdf-openhtmltopdf-pdfbox = { module = "io.github.openhtmltopdf:openhtmltopdf-pdfbox", version.ref = "io-github-openhtmltopdf-openhtmltopdf-pdfbox" }
+io-micrometer-micrometer-tracing-bridge-otel = { module = "io.micrometer:micrometer-tracing-bridge-otel", version.ref = "io-micrometer-micrometer-tracing-bridge-otel" }
+jakarta-servlet-jakarta-servlet-api = { module = "jakarta.servlet:jakarta.servlet-api", version.ref = "jakarta-servlet-jakarta-servlet-api" }
+org-apache-commons-commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "org-apache-commons-commons-lang3" }
+org-apache-commons-commons-text = { module = "org.apache.commons:commons-text", version.ref = "org-apache-commons-commons-text" }
+org-apache-pdfbox-pdfbox = { module = "org.apache.pdfbox:pdfbox", version.ref = "org-apache-pdfbox-pdfbox" }
+org-apache-poi-poi = {module = "org.apache.poi:poi", version.ref = "org-apache-poi-poi"}
+org-apache-poi-poi-ooxml = {module = "org.apache.poi:poi-ooxml", version.ref = "org-apache-poi-poi"}
+org-hibernate-orm-hibernate-core = { module = "org.hibernate.orm:hibernate-core", version.ref = "org-hibernate-orm-hibernate-core" }
+org-jsoup-jsoup = { module = 'org.jsoup:jsoup', version.ref = "org-jsoup-jsoup" }
+org-liquibase-liquibase-core = { module = "org.liquibase:liquibase-core", version.ref = "org-liquibase-liquibase-core" }
+org-keycloak-keycloak-admin-client = { module = "org.keycloak:keycloak-admin-client", version.ref = "org-keycloak-keycloak-admin-client" }
+org-mapstruct-mapstruct = { module = "org.mapstruct:mapstruct", version.ref = "org-mapstruct-mapstruct" }
+org-mapstruct-mapstruct-processor = { module = "org.mapstruct:mapstruct-processor", version.ref = "org-mapstruct-mapstruct-processor" }
+org-owasp-encoder-encoder = { module = "org.owasp.encoder:encoder", version.ref = "org-owasp-encoder-encoder" }
+org-passay-passay = { module = "org.passay:passay", version.ref = "org-passay-passay" }
+org-projectlombok-lombok = { module = "org.projectlombok:lombok", version.ref = "org-projectlombok-lombok" }
+
+
+# Spring Doc - OpenAPI
+org-springdoc-springdoc-openapi-starter-common = { module = "org.springdoc:springdoc-openapi-starter-common", version.ref = "org-springdoc-springdoc-openapi-starter-common" }
+org-springdoc-springdoc-openapi-starter-webmvc-ui = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "org-springdoc-springdoc-openapi-starter-webmvc-ui" }
+
+# Spring Framework
+org-springframework-boot-spring-boot-starter = { module = "org.springframework.boot:spring-boot-starter", version.ref = "org-springframework-boot-spring-boot-starter" }
+org-springframework-boot-spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "org-springframework-boot-spring-boot-starter-actuator" }
+org-springframework-boot-spring-boot-starter-aop = { module = "org.springframework.boot:spring-boot-starter-aop", version.ref = "org-springframework-boot-spring-boot-starter-aop" }
+org-springframework-boot-spring-boot-starter-data-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa", version.ref = "org-springframework-boot-spring-boot-starter-data-jpa" }
+org-springframework-boot-spring-boot-starter-data-redis = { module = "org.springframework.boot:spring-boot-starter-data-redis", version.ref = "org-springframework-boot-spring-boot-starter-data-redis" }
+org-springframework-boot-spring-boot-starter-freemarker = { module = "org.springframework.boot:spring-boot-starter-freemarker", version.ref = "org-springframework-boot-spring-boot-starter-freemarker" }
+org-springframework-boot-spring-boot-starter-logging = { module = "org.springframework.boot:spring-boot-starter-logging", version.ref = "org-springframework-boot-spring-boot-starter-logging" }
+org-springframework-boot-spring-boot-starter-mail = { module = "org.springframework.boot:spring-boot-starter-mail", version.ref = "org-springframework-boot-spring-boot-starter-mail" }
+org-springframework-boot-spring-boot-starter-oauth2-resource-server = { module = "org.springframework.boot:spring-boot-starter-oauth2-resource-server", version.ref = "org-springframework-boot-spring-boot-starter-oauth2-resource-server" }
+org-springframework-boot-spring-boot-starter-security = { module = "org.springframework.boot:spring-boot-starter-security", version.ref = "org-springframework-boot-spring-boot-starter-security" }
+org-springframework-boot-spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "org-springframework-boot-spring-boot-starter-test" }
+org-springframework-boot-spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "org-springframework-boot-spring-boot-starter-validation" }
+org-springframework-boot-spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "org-springframework-boot-spring-boot-starter-web" }
+org-springframework-cloud-spring-cloud-stream = { module = "org.springframework.cloud:spring-cloud-stream", version.ref = "org-springframework-cloud-spring-cloud-stream" }
+org-springframework-data-spring-data-jpa = { module = "org.springframework.data:spring-data-jpa", version.ref = "org-springframework-data-spring-data-jpa" }
+org-springframework-security-spring-security-config = { module = "org.springframework.security:spring-security-config", version.ref = "org-springframework-security-spring-security-config" }
+org-springframework-security-spring-security-core = { module = "org.springframework.security:spring-security-core", version.ref = "org-springframework-security-spring-security-core" }
+org-springframework-security-spring-security-oauth2-jose = { module = "org.springframework.security:spring-security-oauth2-jose", version.ref = "org-springframework-security-spring-security-oauth2-jose" }
+org-springframework-security-spring-security-test = { module = "org.springframework.security:spring-security-test", version.ref = "org-springframework-security-spring-security-test" }
+org-springframework-security-spring-security-web = { module = "org.springframework.security:spring-security-web", version.ref = "org-springframework-security-spring-security-web" }
+org-springframework-spring-aspects = { module = "org.springframework:spring-aspects", version.ref = "org-springframework-spring-aspects" }
+org-springframework-spring-context = { module = "org.springframework:spring-context", version.ref = "org-springframework-spring-context" }
+org-springframework-spring-web = { module = "org.springframework:spring-web", version.ref = "org-springframework-spring-web" }
+org-springframework-spring-webmvc = { module = "org.springframework:spring-webmvc", version.ref = "org-springframework-spring-webmvc" }
+
+#POSTGRESQL
+org-postgresql-postgresql = { module = "org.postgresql:postgresql", version.ref = "org-postgresql-postgresql" }
+
+
+#AZURE
+# Core Azure dependencies
+com-azure-azure-storage-blob = { module = "com.azure:azure-storage-blob", version.ref = "com-azure-azure-storage-blob" }
+com-azure-spring-cloud-azure-starter-storage = { module = "com.azure.spring:spring-cloud-azure-starter-storage", version.ref = "com-azure-spring-cloud-azure-starter-storage" }
+com-azure-identity = { module = "com.azure:azure-identity", version.ref = "com-azure-identity" }
+
+# Database provisioning
+com-azure-resourcemanager-sql = { module = "com.azure.resourcemanager:azure-resourcemanager-sql", version.ref = "com-azure-resourcemanager-sql" }
+
+# Messaging (choose ONE based on your use case)
+com-azure-spring-cloud-azure-starter-servicebus-jms = { module = "com.azure.spring:spring-cloud-azure-starter-servicebus-jms", version.ref = "com-azure-spring-cloud-azure-starter-servicebus" }

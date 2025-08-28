@@ -1,0 +1,15 @@
+code,name,description
+PROVISIONING_INITIATED,Provisioning initiated,Resource provisioning has been initiated.
+PROVISIONING_IN_PROGRESS,Provisioning in progress,Resource provisioning in progress.
+PROVISIONING_FAILED,Provisioning failed,Resource provisioning has failed.
+PROVISIONING_COMPLETED,Provisioning completed,Resource provisioning has been completed.
+PROVISIONING_POST_ACTIONS_INITIATED,Provisioning post actions initiated,Execution of post provisioning actions have been initiated.
+PROVISIONING_POST_ACTIONS_IN_PROGRESS,Provisioning post actions in progress,Execution of post provisioning actions are in progress.
+PROVISIONING_POST_ACTIONS_FAILED,Provisioning post actions failed,Execution of post provisioning actions have failed.
+PROVISIONING_POST_ACTIONS_COMPLETED,Provisioning post actions completed,Execution of post provisioning actions have been completed.
+ACTIVE,Active,Resource is active and ready for usage.
+SHUTDOWN_INITIATED,Shutdown initiated,Resource shutdown has been initiated.
+SHUTDOWN_IN_PROGRESS,Shutdown in progress,Resource shutdown in progress.
+SHUTDOWN_FAILED,Shutdown failed,Resource shutdown failed.
+SHUTDOWN_COMPLETED,Shutdown completed,Resource has been shutdown successfully.
+DEACTIVATED,Deactivated,Resource has been deactivated.

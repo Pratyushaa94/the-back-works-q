@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~  Copyright (c) 2025 Revinci AI.
+  ~
+  ~  All rights reserved. This software is proprietary to and embodies the
+  ~  confidential technology of Revinci AI. Possession,
+  ~  use, duplication, or dissemination of the software and media is
+  ~  authorized only pursuant to a valid written license from Revinci AI.
+  ~
+  ~  Unauthorized use of this software is strictly prohibited.
+  ~
+  ~  THIS SOFTWARE IS PROVIDED BY Revinci AI "AS IS" AND ANY
+  ~  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  ~  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  ~  DISCLAIMED. IN NO EVENT SHALL REVINCI AI BE LIABLE FOR
+  ~  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  ~  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+  ~  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  ~  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+  ~  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+  ~  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  ~
+  ~ @author
+  ~
+  -->
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.33.xsd">
+
+    <!-- Properties that we will use. -->
+    <property name="uuid_function" value="gen_random_uuid()" dbms="postgresql"/>
+    <property name="uuid_type" value="uuid" dbms="postgresql"/>
+
+    <!-- Core tables. -->
+    <changeSet id="0.0.1-ddl-1" author="Subbu">
+        <!-- Table: tenant -->
+        <createTable tableName="tenant">
+            <column name="id" type="${uuid_type}" defaultValueComputed="${uuid_function}">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="realm_name" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT"/>
+            <column name="logo" type="VARCHAR(1024)"/>
+            <column name="address" type="VARCHAR(512)"/>
+            <column name="secret" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="vertical" type="VARCHAR(32)"/>
+            <column name="category" type="VARCHAR(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="master" type="BOOLEAN" defaultValueBoolean="false"/>
+            <column name="configuration" type="JSONB"/>
+            <column name="created_by" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="BIGINT" defaultValueComputed="EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified_by" type="VARCHAR(36)"/>
+            <column name="last_modified_date" type="BIGINT"/>
+        </createTable>
+        <!-- Foreign key for type -->
+        <addForeignKeyConstraint baseTableName="tenant"
+                                 baseColumnNames="type"
+                                 constraintName="fk_tenant_type"
+                                 referencedTableName="tenant_type"
+                                 referencedColumnNames="code"/>
+        <!-- Foreign key for category -->
+        <addForeignKeyConstraint baseTableName="tenant"
+                                 baseColumnNames="category"
+                                 constraintName="fk_tenant_c"
+                                 referencedTableName="tenant_category"
+                                 referencedColumnNames="code"/>
+        <!-- Foreign key for vertical -->
+        <addForeignKeyConstraint baseTableName="tenant"
+                                 baseColumnNames="vertical"
+                                 constraintName="fk_tenant_vertical"
+                                 referencedTableName="industry_vertical"
+                                 referencedColumnNames="code"/>
+        <!-- Foreign key for status -->
+        <addForeignKeyConstraint baseTableName="tenant"
+                                 baseColumnNames="status"
+                                 constraintName="fk_tenant_status"
+                                 referencedTableName="tenant_status"
+                                 referencedColumnNames="code"/>
+        <!-- Indexes. -->
+        <createIndex indexName="idx_tenant_n" tableName="tenant">
+            <column name="name"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_t" tableName="tenant">
+            <column name="type"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_c" tableName="tenant">
+            <column name="category"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_v" tableName="tenant">
+            <column name="vertical"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_s" tableName="tenant">
+            <column name="status"/>
+        </createIndex>
+        <!-- GIN index for configuration -->
+        <sql>
+            CREATE INDEX idx_gin_tenant_configuration ON tenant USING gin (configuration);
+        </sql>
+
+        <!-- Table: tenant_resource -->
+        <createTable tableName="tenant_resource">
+            <column name="id" type="${uuid_type}">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="tenant_id" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="resource_type" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="resource_status" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="failure_message" type="TEXT"/>
+        </createTable>
+        <!-- Foreign key for tenant_id -->
+        <addForeignKeyConstraint baseTableName="tenant_resource"
+                                 baseColumnNames="tenant_id"
+                                 constraintName="fk_tenant_resource_tenant"
+                                 referencedTableName="tenant"
+                                 referencedColumnNames="id"/>
+        <!-- Foreign key for resource_type -->
+        <addForeignKeyConstraint baseTableName="tenant_resource"
+                                 baseColumnNames="resource_type"
+                                 constraintName="fk_tenant_resource_type"
+                                 referencedTableName="tenant_resource_type"
+                                 referencedColumnNames="code"/>
+        <!-- Foreign key for resource_status -->
+        <addForeignKeyConstraint baseTableName="tenant_resource"
+                                 baseColumnNames="resource_status"
+                                 constraintName="fk_tenant_resource_status"
+                                 referencedTableName="tenant_resource_status"
+                                 referencedColumnNames="code"/>
+        <!-- Creating individual indexes -->
+        <createIndex indexName="idx_tenant_resource_ti" tableName="tenant_resource">
+            <column name="tenant_id"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_resource_rt" tableName="tenant_resource">
+            <column name="resource_type"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_resource_rs" tableName="tenant_resource">
+            <column name="resource_status"/>
+        </createIndex>
+        <!-- Creating composite indexes -->
+        <createIndex indexName="idx_tenant_resource_ti_rt" tableName="tenant_resource">
+            <column name="tenant_id"/>
+            <column name="resource_type"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_resource_ti_rs" tableName="tenant_resource">
+            <column name="tenant_id"/>
+            <column name="resource_status"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_resource_ti_rt_rs" tableName="tenant_resource">
+            <column name="tenant_id"/>
+            <column name="resource_type"/>
+            <column name="resource_status"/>
+        </createIndex>
+
+        <!-- Table: tenant_resource_configuration -->
+        <createTable tableName="tenant_resource_configuration">
+            <column name="id" type="${uuid_type}">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="tenant_resource_id" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="key" type="VARCHAR(128)"/>
+            <column name="value_type" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="VARCHAR(255)"/>
+        </createTable>
+        <!-- Foreign key for tenant_resource_id -->
+        <addForeignKeyConstraint baseTableName="tenant_resource_configuration"
+                                 baseColumnNames="tenant_resource_id"
+                                 constraintName="fk_tenant_resource_configuration_tenant_resource"
+                                 referencedTableName="tenant_resource"
+                                 referencedColumnNames="id"/>
+        <!-- Foreign key for value_type -->
+        <addForeignKeyConstraint baseTableName="tenant_resource_configuration"
+                                 baseColumnNames="value_type"
+                                 constraintName="fk_tenant_resource_configuration_data_type"
+                                 referencedTableName="data_type"
+                                 referencedColumnNames="code"/>
+
+        <!-- Table: tenant_contact -->
+        <createTable tableName="tenant_contact">
+            <column name="id" type="${uuid_type}">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="tenant_id" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="username" type="VARCHAR(254)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(254)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="firstname" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="lastname" type="VARCHAR(64)"/>
+            <column name="mobile" type="VARCHAR(24)"/>
+            <column name="temp_password" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <!-- Unique key constraints for tenant_id, username, email -->
+        <addUniqueConstraint columnNames="tenant_id, username, email"
+                             constraintName="uk_tenant_contact_ti_u_e"
+                             tableName="tenant_contact"/>
+        <!-- Foreign key for tenant_id -->
+        <addForeignKeyConstraint baseTableName="tenant_contact"
+                                 baseColumnNames="tenant_id"
+                                 constraintName="fk_tenant_contact_tenant"
+                                 referencedTableName="tenant"
+                                 referencedColumnNames="id"/>
+        <!-- Creating indexes -->
+        <createIndex indexName="idx_tenant_contact_ti" tableName="tenant_contact">
+            <column name="tenant_id"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_contact_u" tableName="tenant_contact">
+            <column name="username"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_contact_e" tableName="tenant_contact">
+            <column name="email"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_contact_f" tableName="tenant_contact">
+            <column name="firstname"/>
+        </createIndex>
+        <!-- Combined indexes -->
+        <createIndex indexName="idx_tenant_contact_ti_u" tableName="tenant_contact">
+            <column name="tenant_id"/>
+            <column name="username"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_contact_ti_e" tableName="tenant_contact">
+            <column name="tenant_id"/>
+            <column name="email"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_contact_ti_f" tableName="tenant_contact">
+            <column name="tenant_id"/>
+            <column name="firstname"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

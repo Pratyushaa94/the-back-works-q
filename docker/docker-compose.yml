@@ -1,0 +1,57 @@
+version: '3.7'
+
+services:
+  # Database for RVC Platform.
+  # On startup, it creates two databases - local_master_rvc_platform_db, rvc_platform_keycloak_db
+  rvc-platform-db:
+    image: postgres:16.3
+    restart: always
+    volumes:
+      - ./rvc-platform-vols/rvc-platform-db:/var/lib/postgresql/data
+      - ./rvc-platform-db:/docker-entrypoint-initdb.d
+    env_file:
+      - rvc-platform-db.env
+    ports:
+      - "${DB_PORT}:${DB_PORT}"
+    networks:
+      - rvc-platform-network
+
+  # Keycloak for RVC Platform.
+  rvc-platform-keycloak:
+    image: quay.io/keycloak/keycloak:24.0.4
+    command: start-dev
+    env_file:
+      - "./rvc-platform-keycloak.env"
+    ports:
+      - "${KEYCLOAK_PORT}:${KEYCLOAK_PORT}"
+    restart: always
+    volumes:
+      - ./rvc-platform-vols/rvc-platform-keycloak:/opt/apps/azure/creds
+    depends_on:
+      - rvc-platform-db
+    networks:
+      - rvc-platform-network
+
+  # Azure Service Bus JMS emulator for running RVC Platform locally.
+  rvc-platform-servicebus:
+    image: mcr.microsoft.com/azure-messaging/servicebus-emulator:latest
+    environment:
+      - ACCEPT_EULA=Y
+    ports:
+      - "${AZURE_SERVICEBUS_EMULATOR_PORT:-5672}:5672"
+      - "${AZURE_SERVICEBUS_MANAGEMENT_PORT:-15672}:15672"
+    restart: always
+    networks:
+      - rvc-platform-network
+
+  # Redis service.
+  redis:
+    image: redis:7.4.1
+    container_name: redis
+    command: /bin/sh -c "redis-server --requirepass redis"
+    ports:
+      - 6379:6379
+
+networks:
+  rvc-platform-network:
+    driver: bridge

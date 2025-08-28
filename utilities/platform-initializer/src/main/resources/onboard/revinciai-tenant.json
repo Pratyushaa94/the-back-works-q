@@ -1,0 +1,18 @@
+{
+  "realmName": "revinci",
+  "name": "revinci",
+  "description": "Bill and Sell Agents.",
+  "address": "USA",
+  "type": "COMPANY",
+  "category": "SMALL",
+  "master": true,
+  "contacts": [
+    {
+      "username": "subbu@qworks.ai",
+      "email": "subbu@qworks.ai",
+      "firstname": "Subrahmanyam",
+      "lastname": "Bandepalli",
+      "mobile": "+919490945968"
+    }
+  ]
+}

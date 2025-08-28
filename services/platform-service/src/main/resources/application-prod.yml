@@ -1,0 +1,13 @@
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+# Override email address for sending notification on tenant provisioning.
+revinciai:
+  platform:
+    notification:
+      tenant-provisioned:
+        recipient: "${RVC_PLATFORM_NOTIFICATION_TENANT_PROVISIONED_RECIPIENT:subbu@revinci.ai}"

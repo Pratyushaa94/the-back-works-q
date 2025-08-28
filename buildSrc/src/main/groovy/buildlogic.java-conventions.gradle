@@ -1,0 +1,301 @@
+/*
+ * Copyright (c) 2025 Revinci AI.
+ *
+ * All rights reserved. This software is proprietary to and embodies the
+ * confidential technology of Revinci AI. Possession,
+ * use, duplication, or dissemination of the software and media is
+ * authorized only pursuant to a valid written license from
+ * Revinci AI Solutions Pvt. Ltd.
+ *
+ * Unauthorized use of this software is strictly prohibited.
+ *
+ * THIS SOFTWARE IS PROVIDED BY Revinci AI "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL Revinci AI BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+ * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'idea'
+    id "org.sonarqube"
+}
+
+sonar {
+    properties {
+        property "sonar.projectKey", ""
+        property "sonar.organization", ""
+        property "sonar.host.url", "https://sonarcloud.io"
+    }
+}
+
+
+repositories {
+    maven {
+        url = uri('https://repo.maven.apache.org/maven2/')
+    }
+    maven {
+        url = uri('https://repo.spring.io/milestone')
+    }
+    mavenLocal()
+    mavenCentral()
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from(components.java)
+        }
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+idea {
+    module {
+        downloadSources = true
+    }
+}
+
+configurations.all {
+    exclude group: 'commons-logging', module: 'commons-logging'
+}
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.compilerArgs += ['-parameters']
+}
+
+tasks.withType(Javadoc).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+// Version management
+ext {
+    def versionFile = rootProject.file('version.properties')
+    if (!versionFile.exists()) {
+        versionFile.text = """
+            major=0
+            minor=0
+            patch=1
+            preRelease=SNAPSHOT
+            """.stripIndent()
+    }
+
+    def versionProps = new Properties()
+    versionFile.withInputStream { versionProps.load(it) }
+
+    major = (versionProps.major ?: "0") as Integer
+    minor = (versionProps.minor ?: "0") as Integer
+    patch = (versionProps.patch ?: "1") as Integer
+    preRelease = versionProps.preRelease ?: ""
+
+    // Build number format: yyyyMMdd.HHmmss
+    buildNumber = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd."))
+    buildNumber += project.findProperty('useBuildNumber') ?: System.getenv('BUILD_NUMBER') ?: "0"
+
+    // Full version format: major.minor.patch-preRelease.buildNumber
+    fullVersion = "${major}.${minor}.${patch}"
+    fullVersion += preRelease ? "-${preRelease}" : ""
+    fullVersion += ".${buildNumber}"
+}
+
+// Common configurations
+group = 'ai.revinci.platform'
+version = fullVersion
+java.sourceCompatibility = JavaVersion.VERSION_21
+
+
+
+// Version management tasks
+ext.configureVersioning = { project ->
+    if (!project.tasks.findByName('showVersion')) {
+        project.tasks.register('showVersion') {
+            group = 'Version Management'
+            description = 'Shows the current version information'
+
+            doLast {
+                println """
+                Current Version Information:
+                ---------------------------
+                Full Version: ${fullVersion}
+                Major: ${major}
+                Minor: ${minor}
+                Patch: ${patch}
+                Pre-release: ${preRelease}
+                Build Number: ${buildNumber}
+                """.stripIndent()
+            }
+        }
+    }
+
+    if (!project.tasks.findByName('bumpVersion')) {
+        project.tasks.register('bumpVersion') {
+            group = 'Version Management'
+            description = 'Bumps the version according to specified component'
+
+            doLast {
+                def component = project.hasProperty('component') ? project.component.toString() : 'patch'
+                def newPreRelease = project.hasProperty('preRelease') ? project.preRelease.toString() : preRelease
+
+                def props = new Properties()
+                def versionFile = rootProject.file('version.properties')
+                props.load(versionFile.newDataInputStream())
+
+                def major = (props.major ?: "0") as Integer
+                def minor = (props.minor ?: "0") as Integer
+                def patch = (props.patch ?: "1") as Integer
+
+                switch (component.toLowerCase()) {
+                    case 'major':
+                        major += 1
+                        minor = 0
+                        patch = 0
+                        break
+                    case 'minor':
+                        minor += 1
+                        patch = 0
+                        break
+                    case 'patch':
+                        patch += 1
+                        break
+                    default:
+                        throw new GradleException("Invalid version component: ${component}")
+                }
+
+                props.major = major.toString()
+                props.minor = minor.toString()
+                props.patch = patch.toString()
+                props.preRelease = newPreRelease.toString()
+
+                versionFile.withWriter { writer ->
+                    props.store(writer, null)
+                }
+
+                println "Version bumped to ${props.major}.${props.minor}.${props.patch}-${props.preRelease}"
+
+                // Create and push git tag
+                if (!project.hasProperty('skipGitTag')) {
+                    exec {
+                        commandLine 'git', 'tag', '-a', "v${props.major}.${props.minor}.${props.patch}".toString(),
+                                '-m', "Release version ${props.major}.${props.minor}.${props.patch}".toString()
+                    }
+                    exec {
+                        commandLine 'git', 'push', 'origin', "v${props.major}.${props.minor}.${props.patch}".toString()
+                    }
+                }
+            }
+        }
+    }
+
+    if (!project.tasks.findByName('createChangelog')) {
+        project.tasks.register('createChangelog') {
+            group = 'Version Management'
+            description = 'Generates changelog from git commits'
+
+            doLast {
+                def lastTag = 'git describe --tags --abbrev=0'.execute().text.trim()
+                def changelog = new StringBuilder()
+                changelog.append("# Changelog for version ${fullVersion}\n\n")
+
+                def commits = "git log ${lastTag}..HEAD --pretty=format:%s".execute().text
+                commits.split('\n').each { commit ->
+                    changelog.append("* ${commit}\n")
+                }
+
+                // Define the changelog directory
+                def changelogDir = rootProject.file("changelog")
+
+                // Create the directory if it doesn't exist
+                if (!changelogDir.exists()) {
+                    changelogDir.mkdirs()
+                }
+
+                def changelogFile = new File(changelogDir, "changelog-${fullVersion}.md")
+                changelogFile.text = changelog.toString()
+                println "Changelog generated at ${changelogFile.path}"
+            }
+        }
+    }
+}
+
+// Docker configuration for Spring Boot services
+ext.configureDocker = { project ->
+    if (project.plugins.hasPlugin('org.springframework.boot')) {
+        project.bootBuildImage {
+            def registryUrl = System.env.AZURE_CONTAINER_REGISTRY ?: "revinciregistry-ecb3hqdmhvexa8f7.azurecr.io"
+            def tagList = [
+                    "${registryUrl}/rvc-platform/${project.name}:latest",
+                    "${registryUrl}/rvc-platform/${project.name}:${major}.${minor}.${patch}",
+                    "${registryUrl}/rvc-platform/${project.name}:${fullVersion}"
+            ]
+
+            createdDate = "now"
+            environment = [
+                    "BP_JVM_VERSION" : "21",
+                    "SERVICE_VERSION": "${fullVersion}"
+            ]
+            imageName = tagList[0]
+            tags = tagList.drop(1)
+            // Set publish to true to push the image to the registry
+            publish = !project.hasProperty('skipPublish')
+            // Provide authentication credentials to the publish registry
+            docker {
+                bindHostToBuilder = true
+                securityOptions = []
+                buildWorkspace {
+                    bind {
+                        source = "/github/workspace/cache-${project.name}.work"
+                    }
+                }
+                buildCache {
+                    bind {
+                        source = "/github/workspace/cache-${project.name}.build"
+                    }
+                }
+                launchCache {
+                    bind {
+                        source = "/github/workspace/cache-${project.name}.launch"
+                    }
+                }
+                publishRegistry {
+                    url = "https://${registryUrl}"
+                    try {
+                        // Use Azure Container Registry authentication
+                        def acrUsername = System.env.AZURE_CLIENT_ID ?: System.env.ACR_USERNAME
+                        def acrPassword = System.env.AZURE_CLIENT_SECRET ?: System.env.ACR_PASSWORD
+                        
+                        if (acrUsername && acrPassword) {
+                            username = acrUsername
+                            password = acrPassword
+                        } else {
+                            // Fallback to Azure CLI authentication
+                            def accessToken = "az acr login --name ${registryUrl.split('\\.')[0]} --expose-token --output tsv --query accessToken".execute().text.trim()
+                            username = "00000000-0000-0000-0000-000000000000"
+                            password = accessToken
+                        }
+                    } catch (final Exception e) {
+                        println "Cannot publish the docker image. Error: ${e.message}"
+                        // Set publish to false to skip publishing if an error occurs
+                        publish = false
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Apply versioning configuration to root project
+configureVersioning(rootProject)

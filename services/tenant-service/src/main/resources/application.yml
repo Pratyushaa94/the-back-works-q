@@ -1,0 +1,177 @@
+#
+#  Copyright (c) 2025 Revinci AI.
+#
+#  All rights reserved. This software is proprietary to and embodies the
+#  confidential technology of Revinci AI. Possession,
+#  use, duplication, or dissemination of the software and media is
+#  authorized only pursuant to a valid written license from Revinci AI.
+#
+#  Unauthorized use of this software is strictly prohibited.
+#
+#  THIS SOFTWARE IS PROVIDED BY Revinci AI "AS IS" AND ANY
+#  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+#  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#  DISCLAIMED. IN NO EVENT SHALL REVINCI AI BE LIABLE FOR
+#  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+#  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+#  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+#  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+#  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+#  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# @author
+#
+#
+logging:
+  level:
+    org.springframework.cloud.stream.binder: ${SPRING_LOG_LEVEL:ERROR}
+    org.springframework.integration: ${SPRING_LOG_LEVEL:ERROR}
+    com.azure.messaging.servicebus: ${SPRING_LOG_LEVEL:ERROR}
+    org.springframework: ${SPRING_LOG_LEVEL:ERROR}
+    ai.revinci: ${RVC_PLATFORM_LOG_LEVEL:DEBUG}
+  pattern:
+    level: "%5p [%X{realm:-},%X{tenantId:-},%X{applicationId:-}]"
+
+# Health endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+
+# Server settings
+server:
+  port: 8082
+  shutdown: graceful
+
+# Application settings
+spring:
+  main:
+    banner-mode: off
+  application:
+    name: tenant-service
+  # Redis settings
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      username: ${REDIS_USERNAME:default}
+      password: ${REDIS_PASSWORD:redis}
+  datasource:
+    driverClassName: org.postgresql.Driver
+    username: ${MASTER_DB_USER:postgres}
+    password: ${MASTER_DB_PASSWORD:postgres}
+    url: jdbc:postgresql://${MASTER_DB_HOST:localhost}:${MASTER_DB_PORT:5432}/${MASTER_DB_NAME:local_master_rvc_platform_db}?createDatabaseIfNotExist=true
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 30000
+      max-lifetime: 60000
+      connection-timeout: 30000
+  jpa:
+    database: POSTGRESQL
+    show-sql: ${MASTER_DB_SHOW_SQL:false}
+    # Do NOT change generate-ddl to true. This will cause the db to be dropped and recreated.
+    generate-ddl: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        default_batch_fetch_size: ${RVC_PLATFORM_DEFAULT_BATCH_FETCH_SIZE:30}
+        # Leave the ddl-auto to none. Changing to any other value causes the db to be dropped and recreated.
+        ddl-auto: none
+        boot:
+          allow_jdbc_metadata_access: true
+        jdbc:
+          batch_size: ${RVC_PLATFORM_DEFAULT_BATCH_FETCH_SIZE:30}
+          lob:
+            non_contextual_creation: true
+  liquibase:
+    enabled: false
+
+  # Azure Service Bus JMS configuration
+  jms:
+    servicebus:
+      connection-string: ${AZURE_SERVICEBUS_CONNECTION_STRING:Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=}
+      pricing-tier: ${AZURE_SERVICEBUS_PRICING_TIER:premium}
+  cloud:
+    function:
+      # Function bound to Spring Cloud Stream
+      definition: rvcPlatformOnDbProvisionedEvent;
+    stream:
+      bindings:
+        # Binding to topic and subscription from where the database provisioning completion events are published.
+        rvcPlatformOnDbProvisionedEvent-in-0:
+          destination: ${spring.profiles.active}-rvc-platform-db-provisioned-topic
+          binder: servicebus
+
+# RVC Platform settings.
+revinciai:
+  platform:
+    api:
+      documentation:
+        title: "RVC Platform : Tenant Service APIs"
+        description: "APIs for Tenant Service"
+        version: "${SERVICE_VERSION:0.0.2-SNAPSHOT}"
+        base-package: "ai.revinci.platform"
+        contact:
+          name: "revinci.ai"
+          email: "info@revinci.ai"
+          url: "https://revinci.ai"
+        servers:
+          - url: "http://localhost:8082"
+            description: "Server running on localhost"
+          - url: "https://${spring.profiles.active}-${revinciai.platform.service.api-dns-name}.api.revinci.ai"
+            description: "Server running with '${spring.profiles.active}' profile activated"
+    #Excel export settings - provide the column names
+    export:
+      form:
+        headers:
+          - "Id"
+          - "Title"
+          - "Description"
+    themes:
+      default-theme-values:
+        titleSize: "24"
+        questionSize: "22"
+        descSize: "20"
+        normalTextSize: "20"
+        primaryColor: "#387bff"
+        secondaryColor: "#0cc9c9"
+        formBackground: "#f0ebfe"
+    service:
+      key: ts
+      api-dns-name: tenant
+    security:
+      cors:
+        headers:
+          allowed-origins:
+            - https://localhost:4200
+          allowed-methods:
+            - OPTIONS
+            - POST
+            - GET
+            - PATCH
+            - PUT
+            - DELETE
+          allowed-headers:
+            - Origin
+            - Accept
+            - X-Requested-With
+            - Content-Type
+            - Access-Control-Request-Method
+            - Access-Control-Request-Headers
+            - Authorization
+            - Tenant-Id
+            - X-User-TimeZone
+          max-age: 3600
+          allow-credentials: true

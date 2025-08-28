@@ -1,0 +1,31 @@
+
+# Set the logging level to DEBUG
+logging:
+  level:
+    org.springframework: ${SPRING_LOG_LEVEL:ERROR}
+    ai.revinci: ${RVC_PLATFORM_LOG_LEVEL:DEBUG}
+
+# RVC Platform settings
+revinciai:
+  platform:
+    master-service:
+      urls:
+        onboard-tenant: ${RVC_PLATFORM_MASTER_SERVICE_ONBOARD_TENANT_URL:http://localhost:8081/api/v1/tenants}
+    iam:
+      keycloak:
+        server-url: ${RVC_PLATFORM_KEYCLOAK_URL:http://localhost:8080}
+        realm: ${RVC_PLATFORM_KEYCLOAK_REALM:master}
+        client-id: ${RVC_PLATFORM_KEYCLOAK_CLIENT_ID:admin-cli}
+        grant-type: ${RVC_PLATFORM_KEYCLOAK_GRANT_TYPE:password}
+        username: ${RVC_PLATFORM_KEYCLOAK_USERNAME:admin}
+        password: ${RVC_PLATFORM_KEYCLOAK_PASSWORD:admin}
+
+# Server settings.
+server:
+  port: 8088
+
+# Spring settings.
+spring:
+  application:
+    name: platform-initializer
+

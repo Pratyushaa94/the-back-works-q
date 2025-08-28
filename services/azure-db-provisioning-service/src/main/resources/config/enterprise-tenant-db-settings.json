@@ -1,0 +1,17 @@
+{
+  "skuName": "GP_Gen5_4",
+  "storageGB": 500,
+  "backupRetentionDays": 30,
+  "version": "13",
+  "maxConnections": 1000,
+  "description": "Enterprise tenant database configuration for Azure PostgreSQL",
+  "tier": "GeneralPurpose",
+  "computeUnits": 4,
+  "sslEnforcement": "Enabled",
+  "geoRedundantBackup": "Enabled",
+  "firewallRules": {
+    "allowAzureServices": true,
+    "allowCurrentIp": true
+  }
+}
+

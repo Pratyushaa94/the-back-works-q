@@ -1,0 +1,4 @@
+code,name,description
+SMALL,Small,Customers with low-volume / low-throughput requirements.
+MEDIUM,Medium,Customers with high-volume / low-throughput requirements.
+ENTERPRISE,Enterprise,Customers with high-volume / high-throughput requirements.

@@ -1,0 +1,17 @@
+{
+  "skuName": "B_Gen5_1",
+  "storageGB": 20,
+  "backupRetentionDays": 7,
+  "version": "11",
+  "maxConnections": 50,
+  "description": "Small tenant database configuration for Azure PostgreSQL",
+  "tier": "Basic",
+  "computeUnits": 1,
+  "sslEnforcement": "Enabled",
+  "geoRedundantBackup": "Disabled",
+  "firewallRules": {
+    "allowAzureServices": true,
+    "allowCurrentIp": true
+  }
+}
+

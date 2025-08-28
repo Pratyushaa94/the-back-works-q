@@ -1,0 +1,134 @@
+#
+#  Copyright (c) 2025 Revinci AI.
+#
+#  All rights reserved. This software is proprietary to and embodies the
+#  confidential technology of Revinci AI. Possession,
+#  use, duplication, or dissemination of the software and media is
+#  authorized only pursuant to a valid written license from Revinci AI.
+#
+#  Unauthorized use of this software is strictly prohibited.
+#
+#  THIS SOFTWARE IS PROVIDED BY Revinci AI "AS IS" AND ANY
+#  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+#  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#  DISCLAIMED. IN NO EVENT SHALL REVINCI AI BE LIABLE FOR
+#  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+#  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+#  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+#  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+#  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+#  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# @author
+#
+#
+logging:
+  level:
+    org.springframework.cloud.stream.binder: ${SPRING_LOG_LEVEL:ERROR}
+    org.springframework.integration: ${SPRING_LOG_LEVEL:ERROR}
+    com.azure.messaging.servicebus: ${SPRING_LOG_LEVEL:ERROR}
+    org.springframework: ${SPRING_LOG_LEVEL:ERROR}
+    ai.revinci: ${RVC_PLATFORM_LOG_LEVEL:DEBUG}
+  pattern:
+    level: "%5p [%X{realm:-},%X{tenantId:-},%X{applicationId:-}]"
+
+# Health endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+
+# RVC Platform Keycloak settings
+revinciai:
+  platform:
+    service:
+      key: ikps
+    iam:
+      keycloak:
+        server-url: ${RVC_PLATFORM_KEYCLOAK_URL:http://localhost:8080}
+        realm: ${RVC_PLATFORM_KEYCLOAK_REALM:master}
+        client-id: ${RVC_PLATFORM_KEYCLOAK_CLIENT_ID:admin-cli}
+        grant-type: ${RVC_PLATFORM_KEYCLOAK_GRANT_TYPE:password}
+        username: ${RVC_PLATFORM_KEYCLOAK_USERNAME:admin}
+        password: ${RVC_PLATFORM_KEYCLOAK_PASSWORD:admin}
+        application-url: ${RVC_PLATFORM_KEYCLOAK_APPLICATION_URL:https://localhost:4200}
+
+# Server settings
+server:
+  port: 8086
+
+# Application settings
+spring:
+  main:
+    banner-mode: off
+  application:
+    name: iam-keycloak-provisioning-service
+  # Redis settings
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      username: ${REDIS_USERNAME:default}
+      password: ${REDIS_PASSWORD:redis}
+  # Master database settings
+  datasource:
+    driverClassName: org.postgresql.Driver
+    username: ${MASTER_DB_USER:postgres}
+    password: ${MASTER_DB_PASSWORD:postgres}
+    url: jdbc:postgresql://${MASTER_DB_HOST:localhost}:${MASTER_DB_PORT:5432}/${MASTER_DB_NAME:local_master_rvc_platform_db}?createDatabaseIfNotExist=true
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 30000
+      max-lifetime: 60000
+      connection-timeout: 30000
+  jpa:
+    database: POSTGRESQL
+    show-sql: ${MASTER_DB_SHOW_SQL:false}
+    # Do NOT change generate-ddl to true. This will cause the db to be dropped and recreated.
+    generate-ddl: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        default_schema: ${MASTER_DB_SCHEMA:public}
+        default_batch_fetch_size: ${RVC_PLATFORM_DEFAULT_BATCH_FETCH_SIZE:30}
+        # Leave the ddl-auto to none. Changing to any other value causes the db to be dropped and recreated.
+        ddl-auto: none
+        boot:
+          allow_jdbc_metadata_access: true
+        jdbc:
+          batch_size: ${RVC_PLATFORM_DEFAULT_BATCH_FETCH_SIZE:30}
+          lob:
+            non_contextual_creation: true
+  # Azure Service Bus JMS configuration
+  jms:
+    servicebus:
+      connection-string: ${AZURE_SERVICEBUS_CONNECTION_STRING:Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=}
+      pricing-tier: ${AZURE_SERVICEBUS_PRICING_TIER:premium}
+  cloud:
+    function:
+      # Function bound to Spring Cloud Stream
+      definition: rvcPlatformOnDbProvisionedEvent;
+    stream:
+      bindings:
+        # Binding to topic and subscription where the completion of realm provisioning details will be published to.
+        rvcPlatformPublishRealmProvisionedEvent-out-0:
+          destination: ${spring.profiles.active}-rvc-platform-realm-provisioned-topic
+          binder: servicebus
+        # Binding to topic and subscription from where the database provisioning completion events are published.
+        rvcPlatformOnDbProvisionedEvent-in-0:
+          destination: ${spring.profiles.active}-rvc-platform-db-provisioned-topic
+          group: ${spring.profiles.active}-rvc-platform-db-provisioned-topic-${revinciai.platform.service.key}-sub
+          binder: servicebus
+

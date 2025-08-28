@@ -1,0 +1,29 @@
+spring:
+  profiles:
+    active: demo
+  cloud:
+    stream:
+      servicebus:
+        binder:
+          namespace: ${AZURE_SERVICEBUS_NAMESPACE_DEMO}
+          connection-string: ${AZURE_SERVICEBUS_CONNECTION_STRING_DEMO}
+  datasource:
+    url: jdbc:postgresql://${DB_HOST_DEMO:localhost}:${DB_PORT_DEMO:5432}/${DB_NAME_DEMO:rvc_platform_demo_db}
+    username: ${DB_USERNAME_DEMO:postgres}
+    password: ${DB_PASSWORD_DEMO:postgres}
+
+# Azure Demo Environment Configuration
+azure:
+  subscription-id: ${AZURE_SUBSCRIPTION_ID_DEMO}
+  resource-group: ${AZURE_RESOURCE_GROUP_DEMO:rvc-platform-demo-rg}
+  location: ${AZURE_LOCATION_DEMO:East US}
+  postgresql:
+    admin-username: ${AZURE_POSTGRESQL_ADMIN_USERNAME_DEMO:postgres}
+    admin-password: ${AZURE_POSTGRESQL_ADMIN_PASSWORD_DEMO}
+
+# Logging for Demo Environment
+logging:
+  level:
+    ai.revinci.platform.services.db.provisioning.azure: DEBUG
+    com.azure: DEBUG
+    org.springframework.cloud.stream: DEBUG

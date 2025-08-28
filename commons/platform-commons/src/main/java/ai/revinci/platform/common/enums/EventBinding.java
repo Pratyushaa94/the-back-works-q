@@ -1,0 +1,50 @@
+/*
+ * Copyright (c) 2025 Revinci AI.
+ *
+ * All rights reserved. This software is proprietary to and embodies the
+ * confidential technology of Revinci AI. Possession,
+ * use, duplication, or dissemination of the software and media is
+ * authorized only pursuant to a valid written license from
+ * Revinci AI Solutions Pvt. Ltd.
+ *
+ * Unauthorized use of this software is strictly prohibited.
+ *
+ * THIS SOFTWARE IS PROVIDED BY Revinci AI "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL Revinci AI BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+ * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package ai.revinci.platform.common.enums;
+
+import lombok.AllArgsConstructor;
+
+/**
+ * An enum type to capture the bindings supported by the platform to use Async Operations.
+ * <p>
+ * The value of the enumerated type is the name of an input or output binding, which is further associated to a
+ * destination topic.
+ *
+ * @author Subbu
+ */
+@AllArgsConstructor
+public enum EventBinding implements IEnumValueProvider {
+    OUT_PUBLISH_DB_PROVISIONED_EVENT("rvcPlatformPublishDbProvisionedEvent-out-0"),
+    OUT_PUBLISH_NEW_TENANT_CREATED_EVENT("rvcPlatformPublishNewTenantCreatedEvent-out-0"),
+    OUT_PUBLISH_NOTIFICATION_EVENT("rvcPlatformPublishNotificationEvent-out-0"),
+    OUT_PUBLISH_REALM_PROVISIONED_EVENT("rvcPlatformPublishRealmProvisionedEvent-out-0");
+
+    /** Value of the enumerated type. */
+    private final String value;
+
+    @Override
+    public String value() {
+        return value;
+    }
+}

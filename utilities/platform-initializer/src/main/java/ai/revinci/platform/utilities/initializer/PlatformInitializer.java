@@ -1,0 +1,56 @@
+/*
+ *  Copyright (c) 2025 Revinci AI.
+ *
+ *  All rights reserved. This software is proprietary to and embodies the
+ *  confidential technology of Revinci AI. Possession,
+ *  use, duplication, or dissemination of the software and media is
+ *  authorized only pursuant to a valid written license from Revinci AI.
+ *
+ *  Unauthorized use of this software is strictly prohibited.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY Revinci AI "AS IS" AND ANY
+ *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *  DISCLAIMED. IN NO EVENT SHALL REVINCI AI BE LIABLE FOR
+ *  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ *  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ *  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ *  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+ *  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * @author
+ *
+ */
+
+package ai.revinci.platform.utilities.initializer;
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import lombok.RequiredArgsConstructor;
+
+import ai.revinci.platform.utilities.initializer.service.SeedService;
+
+@SpringBootApplication
+@RequiredArgsConstructor
+public class PlatformInitializer implements CommandLineRunner {
+    /** A service implementation of type {@link SeedService}. */
+    private final SeedService seedService;
+
+    /**
+     * Entry point method for the Data Migration Client.
+     *
+     * @param args Arguments provided to the application.
+     */
+    public static void main(final String[] args) {
+        SpringApplication.run(PlatformInitializer.class, args);
+    }
+
+    @Override
+    public void run(final String... args) throws Exception {
+        seedService.initialize(args);
+    }
+}
+

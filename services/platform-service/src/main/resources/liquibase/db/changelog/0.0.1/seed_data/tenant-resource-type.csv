@@ -1,0 +1,4 @@
+code,name,description
+RVC_PLATFORM_TENANT_DB,RVC Platform Tenant Database,"Tenant-specific database resources like PostgreSQL, MySQL."
+RVC_PLATFORM_TENANT_DWH,RVC Platform Tenant Data Warehouse,"Tenant-specific data warehouses based on databases like PostgreSQL."
+RVC_PLATFORM_IAM_TENANT_REALM,RVC Platform IAM Tenant Realm,"Tenant-specific realm in IAM solution like Keycloak."

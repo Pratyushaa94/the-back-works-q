@@ -1,0 +1,17 @@
+{
+  "skuName": "GP_Gen5_2",
+  "storageGB": 100,
+  "backupRetentionDays": 14,
+  "version": "12",
+  "maxConnections": 200,
+  "description": "Medium tenant database configuration for Azure PostgreSQL",
+  "tier": "GeneralPurpose",
+  "computeUnits": 2,
+  "sslEnforcement": "Enabled",
+  "geoRedundantBackup": "Enabled",
+  "firewallRules": {
+    "allowAzureServices": true,
+    "allowCurrentIp": true
+  }
+}
+

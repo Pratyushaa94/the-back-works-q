@@ -1,0 +1,84 @@
+version: '3.7'
+
+services:
+  # RVC Platform service : platform-service
+  platform-service:
+    image:  ${AZURE_CONTAINER_REGISTRY}/rvc-platform/platform-service:${PLATFORM_SERVICE_VERSION}
+    restart: always
+    volumes:
+      - ./rvc-platform-secrets/secrets:/secrets
+    env_file:
+      - platform-service.env
+    ports:
+      - "8081:8081"
+    networks:
+      - rvc-platform-network
+
+  # RVC Platform service : tenant-service
+  tenant-service:
+    image: ${AZURE_CONTAINER_REGISTRY}/rvc-platform/tenant-service:${TENANT_SERVICE_VERSION}
+    restart: always
+    volumes:
+      - ./rvc-platform-secrets/secrets:/secrets
+    env_file:
+      - tenant-service.env
+    ports:
+      - "8082:8082"
+    networks:
+      - rvc-platform-network
+
+  # RVC Platform service : notification-service
+  notification-service:
+    image: ${AZURE_CONTAINER_REGISTRY}/rvc-platform/notification-service:${NOTIFICATION_SERVICE_VERSION}
+    restart: always
+    volumes:
+      - ./rvc-platform-secrets/secrets:/secrets
+    env_file:
+      - notification-service.env
+    ports:
+      - "8083:8083"
+    networks:
+      - rvc-platform-network
+
+  # RVC Platform service : azure-db-provisioning-service
+  azure-db-provisioning-service:
+    image: ${AZURE_CONTAINER_REGISTRY}/rvc-platform/azure-db-provisioning-service:${AZURE_DB_PROVISIONING_SERVICE_VERSION}
+    restart: always
+    volumes:
+      - ./rvc-platform-secrets/secrets:/secrets
+    env_file:
+      - azure-db-provisioning-service.env
+    ports:
+      - "8084:8084"
+    networks:
+      - rvc-platform-network
+
+  # RVC Platform service : iam-keycloak-provisioning-service
+  iam-keycloak-provisioning-service:
+    image: ${AZURE_CONTAINER_REGISTRY}/rvc-platform/iam-keycloak-provisioning-service:${IAM_KEYCLOAK_PROVISIONING_SERVICE_VERSION}
+    restart: always
+    volumes:
+      - ./rvc-platform-secrets/secrets:/secrets
+    env_file:
+      - iam-keycloak-provisioning-service.env
+    ports:
+      - "8086:8086"
+    networks:
+      - rvc-platform-network
+
+  # RVC Platform service : iam-keycloak-sync-service
+  iam-keycloak-sync-service:
+    image: ${AZURE_CONTAINER_REGISTRY}/rvc-platform/iam-keycloak-sync-service:${IAM_KEYCLOAK_SYNC_SERVICE_VERSION}
+    restart: always
+    volumes:
+      - ./rvc-platform-secrets/secrets:/secrets
+    env_file:
+      - iam-keycloak-sync-service.env
+    ports:
+      - "8087:8087"
+    networks:
+      - rvc-platform-network
+
+networks:
+  rvc-platform-network:
+    driver: bridge

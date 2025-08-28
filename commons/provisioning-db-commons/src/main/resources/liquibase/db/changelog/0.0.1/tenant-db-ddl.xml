@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~  Copyright (c) 2025 Revinci AI.
+  ~
+  ~  All rights reserved. This software is proprietary to and embodies the
+  ~  confidential technology of Revinci AI. Possession,
+  ~  use, duplication, or dissemination of the software and media is
+  ~  authorized only pursuant to a valid written license from Revinci AI.
+  ~
+  ~  Unauthorized use of this software is strictly prohibited.
+  ~
+  ~  THIS SOFTWARE IS PROVIDED BY Revinci AI "AS IS" AND ANY
+  ~  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  ~  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  ~  DISCLAIMED. IN NO EVENT SHALL REVINCI AI BE LIABLE FOR
+  ~  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  ~  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+  ~  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  ~  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+  ~  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+  ~  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  ~
+  ~ @author
+  ~
+  -->
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.33.xsd">
+
+    <property name="uuid_function" value="gen_random_uuid()" dbms="postgresql"/>
+    <property name="uuid_type" value="uuid" dbms="postgresql"/>
+
+    <!-- Tenant and other related tables. -->
+    <changeSet id="0.0.1-ddl-1" author="Subbu">
+        <!-- Table: tenant -->
+        <createTable tableName="tenant">
+            <column name="id" type="${uuid_type}">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="realm_name" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="secret" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="configuration" type="JSONB"/>
+        </createTable>
+        <!-- Unique key constraints for realm_name -->
+        <addUniqueConstraint columnNames="realm_name"
+                             constraintName="uk_tenant_rn"
+                             tableName="tenant"/>
+        <!-- Individual indexes. -->
+        <createIndex indexName="idx_tenant_n" tableName="tenant">
+            <column name="name"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_rn" tableName="tenant">
+            <column name="realm_name"/>
+        </createIndex>
+        <!-- GIN index for configuration -->
+        <sql>
+            CREATE INDEX idx_gin_tenant_configuration ON tenant USING gin (configuration);
+        </sql>
+
+        <!-- Table: role -->
+        <createTable tableName="role">
+            <column name="id" type="${uuid_type}">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="tenant_id" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="iam_role_id" type="${uuid_type}"/>
+        </createTable>
+        <!-- Unique key constraints for tenant_id, name -->
+        <addUniqueConstraint columnNames="tenant_id, name"
+                             constraintName="uk_role_ti_n"
+                             tableName="role"/>
+        <!-- Foreign key for tenant_id -->
+        <addForeignKeyConstraint baseTableName="role"
+                                 baseColumnNames="tenant_id"
+                                 constraintName="fk_role_t"
+                                 referencedTableName="tenant"
+                                 referencedColumnNames="id"/>
+        <!-- Creating individual indexes -->
+        <createIndex indexName="idx_role_ti" tableName="role">
+            <column name="tenant_id"/>
+        </createIndex>
+        <createIndex indexName="idx_role_iri" tableName="role">
+            <column name="iam_role_id"/>
+        </createIndex>
+        <createIndex indexName="idx_role_n" tableName="role">
+            <column name="name"/>
+        </createIndex>
+        <!-- Creating combined indexes -->
+        <createIndex indexName="idx_role_ti_iri" tableName="role">
+            <column name="tenant_id"/>
+            <column name="iam_role_id"/>
+        </createIndex>
+        <createIndex indexName="idx_role_ti_n" tableName="role">
+            <column name="tenant_id"/>
+            <column name="name"/>
+        </createIndex>
+        <createIndex indexName="idx_role_ti_iri_n" tableName="role">
+            <column name="tenant_id"/>
+            <column name="iam_role_id"/>
+            <column name="name"/>
+        </createIndex>
+
+        <!-- Table: role_permission -->
+        <createTable tableName="role_permission">
+            <column name="role_id" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="permission_code" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <!-- Unique key constraints for role_id, permission_code -->
+        <addUniqueConstraint columnNames="role_id, permission_code"
+                             constraintName="uk_role_permission_ri_pc"
+                             tableName="role_permission"/>
+        <!-- Foreign key for role_id -->
+        <addForeignKeyConstraint baseTableName="role_permission"
+                                 baseColumnNames="role_id"
+                                 constraintName="fk_role_permission_r"
+                                 referencedTableName="role"
+                                 referencedColumnNames="id"/>
+        <!-- Foreign key for permission_code -->
+        <addForeignKeyConstraint baseTableName="role_permission"
+                                 baseColumnNames="permission_code"
+                                 constraintName="fk_role_permission_p"
+                                 referencedTableName="permission"
+                                 referencedColumnNames="code"/>
+
+        <!-- Table: tenant_user -->
+        <createTable tableName="tenant_user">
+            <column name="id" type="${uuid_type}">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="tenant_id" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="username" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="iam_user_id" type="${uuid_type}"/>
+            <column name="firstname" type="VARCHAR(150)"/>
+            <column name="lastname" type="VARCHAR(150)"/>
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true"/>
+            <column name="locked" type="BOOLEAN" defaultValueBoolean="false"/>
+            <column name="deleted" type="BOOLEAN" defaultValueBoolean="false"/>
+            <column name="last_login" type="BIGINT"/>
+        </createTable>
+        <!-- Unique key constraints for tenant_id, username -->
+        <addUniqueConstraint columnNames="tenant_id, username"
+                             constraintName="uk_tenant_user_ti_u"
+                             tableName="tenant_user"/>
+        <!-- Unique key constraints for tenant_id, email -->
+        <addUniqueConstraint columnNames="tenant_id, email"
+                             constraintName="uk_tenant_user_ti_e"
+                             tableName="tenant_user"/>
+        <!-- Foreign key for tenant_id -->
+        <addForeignKeyConstraint baseTableName="tenant_user"
+                                 baseColumnNames="tenant_id"
+                                 constraintName="fk_tenant_user_t"
+                                 referencedTableName="tenant"
+                                 referencedColumnNames="id"/>
+        <!-- Individual indexes -->
+        <createIndex indexName="idx_tenant_user_ti" tableName="tenant_user">
+            <column name="tenant_id"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_user_iui" tableName="tenant_user">
+            <column name="iam_user_id"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_user_u" tableName="tenant_user">
+            <column name="username"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_user_f" tableName="tenant_user">
+            <column name="firstname"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_user_l" tableName="tenant_user">
+            <column name="lastname"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_user_e" tableName="tenant_user">
+            <column name="email"/>
+        </createIndex>
+        <!-- Combined indexes -->
+        <createIndex indexName="idx_tenant_user_ti_iui" tableName="tenant_user">
+            <column name="tenant_id"/>
+            <column name="iam_user_id"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_user_ti_u" tableName="tenant_user">
+            <column name="tenant_id"/>
+            <column name="username"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_user_ti_e" tableName="tenant_user">
+            <column name="tenant_id"/>
+            <column name="email"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_user_ti_iui_e" tableName="tenant_user">
+            <column name="tenant_id"/>
+            <column name="iam_user_id"/>
+            <column name="email"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_user_ti_iui_u" tableName="tenant_user">
+            <column name="tenant_id"/>
+            <column name="iam_user_id"/>
+            <column name="username"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_user_ti_iui_e_u" tableName="tenant_user">
+            <column name="tenant_id"/>
+            <column name="iam_user_id"/>
+            <column name="email"/>
+            <column name="username"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_user_ti_f" tableName="tenant_user">
+            <column name="tenant_id"/>
+            <column name="firstname"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_user_ti_l" tableName="tenant_user">
+            <column name="tenant_id"/>
+            <column name="lastname"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_user_ti_f_l" tableName="tenant_user">
+            <column name="tenant_id"/>
+            <column name="firstname"/>
+            <column name="lastname"/>
+        </createIndex>
+
+        <!-- Table: user_role -->
+        <createTable tableName="user_role">
+            <column name="user_id" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_id" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <!-- Unique key constraints for user_id, role_id -->
+        <addUniqueConstraint columnNames="user_id, role_id"
+                             constraintName="uk_user_role_ui_ri"
+                             tableName="user_role"/>
+        <!-- Foreign key for user_id -->
+        <addForeignKeyConstraint baseTableName="user_role"
+                                 baseColumnNames="user_id"
+                                 constraintName="fk_user_role_tu"
+                                 referencedTableName="tenant_user"
+                                 referencedColumnNames="id"/>
+        <!-- Foreign key for role_id -->
+        <addForeignKeyConstraint baseTableName="user_role"
+                                 baseColumnNames="role_id"
+                                 constraintName="fk_user_role_r"
+                                 referencedTableName="role"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+</databaseChangeLog>
